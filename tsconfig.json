@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022", // Upgrade to ES2022 for better async/await and class features
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"], // Update to ES2022 for modern features
     "module": "ESNext",
     "skipLibCheck": true,
 
@@ -14,18 +14,20 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting */
+    /* Type Checking & Linting */
     "strict": true,
+    "exactOptionalPropertyTypes": true, // Ensures precise optional property behavior
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true, // Ensures overridden methods are explicitly marked
+    "noImplicitReturns": true, // Prevents missing return statements
+    "noPropertyAccessFromIndexSignature": true, // Safer property access
 
-    // shadcn
+    /* shadcn/UI Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"],
