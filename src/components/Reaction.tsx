@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 export interface ReactionProps {
     imageSource: string;
@@ -7,6 +7,34 @@ export interface ReactionProps {
 }
 
 const Reaction = ({ imageSource, audioSource, message }: ReactionProps) => {
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        setIsLoading(true);
+        if (audioRef.current) {
+            // Preload the audio
+            audioRef.current.load();
+            
+            // Start playing when loaded
+            const playPromise = audioRef.current.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Audio playback failed:", error);
+                });
+            }
+        }
+        
+        // Cleanup previous audio when component unmounts or audio changes
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
+        };
+    }, [audioSource]);
+
     return (
         <div className="text-center bg-white/30 backdrop-blur-sm p-6 rounded-lg w-full max-w-2xl mx-auto
           border border-pink-200/50 shadow-[0_0_15px_rgba(255,182,193,0.3)] hover:shadow-[0_0_20px_rgba(255,182,193,0.5)]
@@ -16,6 +44,11 @@ const Reaction = ({ imageSource, audioSource, message }: ReactionProps) => {
                 {message}
             </p>
             <div className="relative w-full flex justify-center">
+                {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="animate-pulse text-4xl">💝</div>
+                    </div>
+                )}
                 <img 
                     className="max-h-[300px] md:max-h-[400px] w-auto rounded-lg 
                     shadow-md hover:scale-105 transition-all duration-300 
@@ -24,11 +57,22 @@ const Reaction = ({ imageSource, audioSource, message }: ReactionProps) => {
                     alt={message}
                     onLoad={(e) => {
                         e.currentTarget.style.opacity = "1";
+                        setIsLoading(false);
                     }}
-                    style={{ opacity: 0, transition: 'opacity 0.3s' }}
+                    style={{ 
+                        opacity: isLoading ? 0 : 1, 
+                        transition: 'opacity 0.3s'
+                    }}
                 />
             </div>
-            <audio className="mt-4" autoPlay loop src={audioSource}/>
+            <audio 
+                ref={audioRef}
+                className="mt-4" 
+                loop 
+                preload="auto"
+            >
+                <source src={audioSource} type="audio/mpeg" />
+            </audio>
         </div>
     );
 };

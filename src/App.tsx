@@ -14,12 +14,35 @@ const App = () => {
   const currentCount = yesLastClicked.current ? yesCount: noCount
   const currentReactions = yesLastClicked.current ? yesReactions: noReactions
 
+  const preloadImage = (src: string) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = resolve;
+      img.onerror = reject;
+    });
+  };
+
   const toggleYes = () => {
+    // Preload next audio and image
+    if (yesCount + 1 < yesReactions.length) {
+      const audio = new Audio(yesReactions[yesCount + 1].audioSource);
+      audio.preload = "auto";
+      preloadImage(yesReactions[yesCount + 1].imageSource)
+        .catch(err => console.log('Image preload failed:', err));
+    }
     setYesCount(yesCount+1)
     yesLastClicked.current = true
   }
 
   const toggleNo = () => {
+    // Preload next audio and image
+    if (noCount + 1 < noReactions.length) {
+      const audio = new Audio(noReactions[noCount + 1].audioSource);
+      audio.preload = "auto";
+      preloadImage(noReactions[noCount + 1].imageSource)
+        .catch(err => console.log('Image preload failed:', err));
+    }
     setButtonSize(buttonSize + 1)
     setNoCount(noCount+1)
     yesLastClicked.current = false
