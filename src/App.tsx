@@ -133,10 +133,11 @@ const App = () => {
               </div>
             )}
             {yesCount === yesReactions.length ? 
-              <div className="text-2xl font-bold text-white animate-pulse">
-                Thanks for picking yes!!!!!
-              </div> : null
-            }
+              <div className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-red-400 to-pink-400 
+                bg-clip-text text-transparent animate-pulse px-4 text-center sparkle">
+                Thanks for saying yes my love! 💖 Forever starts now 💝
+              </div>
+            : null}
           </div>
         </div>
       </main>
