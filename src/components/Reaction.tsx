@@ -9,6 +9,7 @@ export interface ReactionProps {
 const Reaction = ({ imageSource, audioSource, message }: ReactionProps) => {
     const audioRef = useRef<HTMLAudioElement>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const isGif = imageSource.endsWith('.gif');
 
     useEffect(() => {
         setIsLoading(true);
@@ -45,9 +46,19 @@ const Reaction = ({ imageSource, audioSource, message }: ReactionProps) => {
             </p>
             <div className="relative w-full flex justify-center">
                 {isLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="animate-pulse text-4xl">💝</div>
+                    <div className="absolute inset-0 flex items-center justify-center bg-pink-50/30 backdrop-blur-sm rounded-lg">
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="animate-bounce text-4xl">💝</div>
+                            <div className="animate-pulse text-pink-600 font-medium">Loading your love...</div>
+                        </div>
                     </div>
+                )}
+                {isGif && (
+                    <img
+                        src={imageSource.replace('.gif', '-preview.jpg')}
+                        className="absolute inset-0 w-full h-full object-cover filter blur-sm"
+                        alt="preview"
+                    />
                 )}
                 <img 
                     className="max-h-[300px] md:max-h-[400px] w-auto rounded-lg 

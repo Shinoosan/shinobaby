@@ -1,5 +1,4 @@
-import React from 'react'
-import { useRef, useState } from "react"
+import React, { useRef, useState, useEffect } from 'react'
 import Reaction from "./components/Reaction"
 import { Button } from "./components/ui/button"
 import { yesReactions } from "@/assets/yesReactions"
@@ -14,6 +13,11 @@ const App = () => {
   const currentCount = yesLastClicked.current ? yesCount: noCount
   const currentReactions = yesLastClicked.current ? yesReactions: noReactions
 
+  const preloadQueue = useRef<{images: Set<string>, audios: Set<string>}>({
+    images: new Set(),
+    audios: new Set()
+  });
+
   const preloadImage = (src: string) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -23,29 +27,47 @@ const App = () => {
     });
   };
 
-  const toggleYes = () => {
-    // Preload next audio and image
-    if (yesCount + 1 < yesReactions.length) {
-      const audio = new Audio(yesReactions[yesCount + 1].audioSource);
-      audio.preload = "auto";
-      preloadImage(yesReactions[yesCount + 1].imageSource)
-        .catch(err => console.log('Image preload failed:', err));
+  const preloadUpcoming = (reactions: ReactionProps[], currentIndex: number) => {
+    for (let i = 1; i <= 2; i++) {
+      const nextIndex = currentIndex + i;
+      if (nextIndex < reactions.length) {
+        const reaction = reactions[nextIndex];
+        
+        if (!preloadQueue.current.images.has(reaction.imageSource)) {
+          preloadQueue.current.images.add(reaction.imageSource);
+          preloadImage(reaction.imageSource);
+        }
+        
+        if (!preloadQueue.current.audios.has(reaction.audioSource)) {
+          preloadQueue.current.audios.add(reaction.audioSource);
+          const audio = new Audio(reaction.audioSource);
+          audio.preload = "auto";
+        }
+      }
     }
-    setYesCount(yesCount+1)
-    yesLastClicked.current = true
+  };
+
+  useEffect(() => {
+    // Preload first reaction from both yes and no paths
+    if (yesReactions.length > 0) {
+      preloadUpcoming(yesReactions, -1);
+    }
+    if (noReactions.length > 0) {
+      preloadUpcoming(noReactions, -1);
+    }
+  }, []);
+
+  const toggleYes = () => {
+    preloadUpcoming(yesReactions, yesCount + 1);
+    setYesCount(yesCount + 1);
+    yesLastClicked.current = true;
   }
 
   const toggleNo = () => {
-    // Preload next audio and image
-    if (noCount + 1 < noReactions.length) {
-      const audio = new Audio(noReactions[noCount + 1].audioSource);
-      audio.preload = "auto";
-      preloadImage(noReactions[noCount + 1].imageSource)
-        .catch(err => console.log('Image preload failed:', err));
-    }
-    setButtonSize(buttonSize + 1)
-    setNoCount(noCount+1)
-    yesLastClicked.current = false
+    preloadUpcoming(noReactions, noCount + 1);
+    setButtonSize(buttonSize + 1);
+    setNoCount(noCount + 1);
+    yesLastClicked.current = false;
   }
 
   // Fun teasing messages based on how many times they tried to say no
